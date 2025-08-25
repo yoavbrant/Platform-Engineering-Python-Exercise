@@ -1,6 +1,6 @@
 # Platform CLI – Final Project
 
-A command-line tool for managing AWS EC2, S3, and Route53 resources securely, with strong restrictions and best practices.
+A command-line tool for managing AWS EC2, S3, and Route53 resources securely.
 
 ---
 
