@@ -1,6 +1,11 @@
 import argparse
 import boto3
+import uuid
+import os
 from platform_cli import ec2_manager, s3_manager, route53_manager
+
+# Default owner for tagging
+OWNER_TAG = ec2_manager.DEFAULT_OWNER
 
 def main():
     parser = argparse.ArgumentParser(description="Platform CLI tool")
@@ -39,9 +44,9 @@ def main():
 
     if args.command == "ec2":
         if args.action == "list":
-            print(ec2_manager.list_instances(session, args.region))
+            print(ec2_manager.list_instances(session, args.region, owner_tag=OWNER_TAG))
         elif args.action == "launch":
-            iid = ec2_manager.launch_instance(session, args.region, args.type, args.os)
+            iid = ec2_manager.launch_instance(session, args.region, args.type, args.os, owner_tag=OWNER_TAG)
             print("Launched:", iid)
         elif args.action == "stop":
             print("Stopped:", ec2_manager.stop_instance(session, args.region, args.id))
@@ -52,36 +57,49 @@ def main():
 
     elif args.command == "s3":
         if args.action == "list":
-            print("My buckets:", s3_manager.list_buckets(session))
+            print("My buckets:", s3_manager.list_buckets(session, owner_tag=OWNER_TAG))
         elif args.action == "create":
             if args.public:
                 ans = input("⚠️ Create PUBLIC bucket? (yes/no): ")
                 if ans.lower() != "yes":
                     print("Cancelled.")
                     return
-            bname = s3_manager.create_bucket(session, args.name, args.region, public=args.public)
+            bname = s3_manager.create_bucket(session, args.name, args.region, public=args.public, owner_tag=OWNER_TAG)
             print("Created bucket:", bname)
         elif args.action == "upload":
-            s3_manager.upload_file(session, args.name, args.file, args.key)
-            print("Uploaded file")
+            key = args.key if args.key else os.path.basename(args.file)
+            s3_manager.upload_file(session, args.name, args.file, key)
+            print(f"Uploaded file '{args.file}' as key '{key}'")
         elif args.action == "delete-file":
-            s3_manager.delete_file(session, args.name, args.key)
-            print("Deleted file")
+            key = args.key if args.key else os.path.basename(args.file)
+            s3_manager.delete_file(session, args.name, key)
+            print(f"Deleted file with key '{key}'")
         elif args.action == "delete-bucket":
             s3_manager.delete_bucket(session, args.name)
             print("Deleted bucket")
 
     elif args.command == "route53":
         if args.action == "list":
-            print(route53_manager.list_zones(session))
+            zones = route53_manager.list_zones(session, owner_tag=OWNER_TAG)
+            print(zones)
         elif args.action == "create":
-            zone = route53_manager.create_hosted_zone(session, args.zone, args.ref)
-            print("Created zone:", zone)
+            if not args.zone:
+                print("Error: --zone is required to create a hosted zone")
+                return
+            caller_ref = args.ref if args.ref else args.zone
+            zone = route53_manager.create_hosted_zone(session, name=args.zone, caller_ref=caller_ref, owner_tag=OWNER_TAG)
+            print(f"Created zone: {zone}")
         elif args.action == "add-record":
+            if not (args.zone_id and args.record and args.rtype and args.value):
+                print("Error: --zone-id, --record, --rtype, and --value are required to add a record")
+                return
             route53_manager.add_record(session, args.zone_id, args.record, args.rtype, args.value)
-            print("Added record")
+            print(f"Added record '{args.record}' of type '{args.rtype}' with value '{args.value}'")
         elif args.action == "records":
-            recs = route53_manager.list_records(session, args.zone_id, args.zone)
+            if not args.zone_id:
+                print("Error: --zone-id is required to list records")
+                return
+            recs = route53_manager.list_records(session, args.zone_id, args.zone if args.zone else "")
             print("Records:", recs)
 
 if __name__ == "__main__":

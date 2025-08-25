@@ -1,4 +1,5 @@
 import time
+import os
 
 OWNER_TAG_KEY = "CreatedBy"
 DEFAULT_OWNER = "yoav"
@@ -14,9 +15,10 @@ def create_bucket(session, bucket_name, region, public=False, owner_tag=None):
     kwargs = {"Bucket": bucket_name}
     if region != "us-east-1":
         kwargs["CreateBucketConfiguration"] = {"LocationConstraint": region}
+
     s3.create_bucket(**kwargs)
 
-    # wait until bucket exists
+    # Wait until bucket exists
     for _ in range(10):
         try:
             s3.head_bucket(Bucket=bucket_name)
@@ -24,7 +26,7 @@ def create_bucket(session, bucket_name, region, public=False, owner_tag=None):
         except Exception:
             time.sleep(2)
 
-    # set default private + encryption
+    # Set default private + encryption
     if not public:
         s3.put_public_access_block(
             Bucket=bucket_name,
@@ -42,11 +44,12 @@ def create_bucket(session, bucket_name, region, public=False, owner_tag=None):
         }
     )
 
-    # add owner tag
+    # Add owner tag
     s3.put_bucket_tagging(
         Bucket=bucket_name,
         Tagging={"TagSet": [{"Key": OWNER_TAG_KEY, "Value": owner_tag}]}
     )
+
     return bucket_name
 
 def list_buckets(session, owner_tag=None):
@@ -54,28 +57,36 @@ def list_buckets(session, owner_tag=None):
         owner_tag = DEFAULT_OWNER
 
     s3 = session.client("s3")
-    buckets = s3.list_buckets().get("Buckets", [])
-    my_buckets = []
-    for b in buckets:
-        try:
-            tags = s3.get_bucket_tagging(Bucket=b["Name"]).get("TagSet", [])
-            tags_dict = {t["Key"]: t["Value"] for t in tags}
-            if tags_dict.get(OWNER_TAG_KEY) == owner_tag:
-                my_buckets.append(b["Name"])
-        except Exception:
-            continue
-    return my_buckets
+    resp = s3.list_buckets()
+    result = []
 
-def upload_file(session, bucket_name, file_path, key):
+    for b in resp.get("Buckets", []):
+        try:
+            tags_resp = s3.get_bucket_tagging(Bucket=b["Name"])
+            tags = {t["Key"]: t["Value"] for t in tags_resp.get("TagSet", [])}
+        except s3.exceptions.ClientError:
+            tags = {}
+        if tags.get(OWNER_TAG_KEY) == owner_tag:
+            result.append(b["Name"])
+    return result
+
+def upload_file(session, bucket_name, file_path, key=None):
+    if key is None:
+        key = os.path.basename(file_path)
     s3 = session.client("s3")
     s3.upload_file(file_path, bucket_name, key)
+    return key
 
 def delete_file(session, bucket_name, key):
     s3 = session.client("s3")
     s3.delete_object(Bucket=bucket_name, Key=key)
+    return key
 
 def delete_bucket(session, bucket_name):
-    s3 = session.resource("s3")
-    bucket = s3.Bucket(bucket_name)
-    bucket.objects.all().delete()
-    bucket.delete()
+    s3 = session.client("s3")
+    # delete all objects first
+    objs = s3.list_objects_v2(Bucket=bucket_name).get("Contents", [])
+    for o in objs:
+        s3.delete_object(Bucket=bucket_name, Key=o["Key"])
+    s3.delete_bucket(Bucket=bucket_name)
+    return bucket_name

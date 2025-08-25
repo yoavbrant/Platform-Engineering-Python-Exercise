@@ -7,7 +7,7 @@ def get_owner_tag_value():
     return DEFAULT_OWNER
 
 def list_instances(session, region, owner_tag=None):
-    """List EC2 instances, filtered by owner tag."""
+    """List only instances owned by DEFAULT_OWNER (or provided tag)."""
     if owner_tag is None:
         owner_tag = DEFAULT_OWNER
 
@@ -36,28 +36,30 @@ def _get_latest_ami(session, region, os_type="amazon"):
         "amazon": "/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64",
         "ubuntu": "/aws/service/canonical/ubuntu/server/22.04/stable/current/amd64/hvm/ebs-gp2/ami-id"
     }
-    key = params["amazon"] if os_type == "amazon" else params["ubuntu"]
+    key = params.get(os_type, params["amazon"])
     return ssm.get_parameter(Name=key)["Parameter"]["Value"]
 
 def launch_instance(session, region, instance_type="t3.micro", os_type="amazon", owner_tag=None):
-    """Launch instance with restrictions (only t3.micro or t2.small, max 2 per owner)."""
+    """Launch instance with owner tag and restrictions."""
     if owner_tag is None:
         owner_tag = DEFAULT_OWNER
 
     if instance_type not in ["t3.micro", "t2.small"]:
         raise ValueError("Instance type must be t3.micro or t2.small")
 
-    # enforce max 2 rule
-    current = list_instances(session, region, owner_tag)
-    if len(current) >= 2:
-        raise RuntimeError("Max 2 instances allowed per owner")
+    # Limit to 2 running instances per owner
+    current_instances = list_instances(session, region, owner_tag)
+    if len(current_instances) >= 2:
+        raise RuntimeError("Maximum 2 instances allowed per owner")
 
-    ami = _get_latest_ami(session, region, os_type)
     ec2 = session.client("ec2", region_name=region)
+    ami_id = _get_latest_ami(session, region, os_type)
+
     resp = ec2.run_instances(
-        ImageId=ami,
+        ImageId=ami_id,
         InstanceType=instance_type,
-        MinCount=1, MaxCount=1,
+        MinCount=1,
+        MaxCount=1,
         TagSpecifications=[{
             "ResourceType": "instance",
             "Tags": [{"Key": OWNER_TAG_KEY, "Value": owner_tag}]

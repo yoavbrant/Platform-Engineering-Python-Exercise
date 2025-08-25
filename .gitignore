@@ -1,3 +1,33 @@
-venv/
+# Python
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+*.pdb
+*.egg
+*.egg-info/
+dist/
+build/
+*.log
+
+# Virtual environment
+venv/
+.env/
+.venv/
+
+# AWS CLI cache or credentials
+.aws/
+
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Pytest cache
+.pytest_cache/
+htmlcov/
+coverage.xml
+
+# Misc
+*.DS_Store
