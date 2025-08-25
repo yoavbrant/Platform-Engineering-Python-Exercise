@@ -4,7 +4,7 @@ A command-line tool for managing AWS EC2, S3, and Route53 resources securely, wi
 
 ---
 
-## ✅ Features
+## Features
 
 - **EC2**
   - List, launch, stop, start, and terminate instances.
@@ -38,98 +38,57 @@ A command-line tool for managing AWS EC2, S3, and Route53 resources securely, wi
 
 - Python 3.9+
 - AWS CLI installed & configured with profiles:
-  ```bash
   aws configure --profile myprofile
+  
 IAM user/role with permissions for EC2, S3, and Route53.
 
-Install dependencies:
+Installation
 
-bash
-Copy
-Edit
-pip install boto3
-▶️ Running the CLI
-On Linux/macOS
-bash
-Copy
-Edit
-python3 -m platform_cli --profile myprofile --region us-east-1 ec2 list
-On Windows (PowerShell / CMD)
-bash
-Copy
-Edit
-python -m platform_cli --profile myprofile --region us-east-1 ec2 list
-🧪 Testing
-Run the automated test:
+Clone the repository and install dependencies:
 
-bash
-Copy
-Edit
-python test_script.py
-Or run individual commands manually (see below).
+git clone https://github.com/yoavbrant/Platform-Engineering-Python-Exercise.git
+cd Platform-Engineering-Python-Exercise
+pip install -r requirements.txt
 
-📋 Example CLI Commands
-These commands replicate the functionality tested in test_script.py.
+Usage
 
-EC2
-bash
-Copy
-Edit
-# List instances
-python -m platform_cli --profile myprofile --region us-east-1 ec2 list
+Run the CLI using:
 
-# Launch instance (Amazon Linux 2023, t3.micro)
-python -m platform_cli --profile myprofile --region us-east-1 ec2 launch --type t3.micro --ami amazon
+python -m platform_cli --profile <aws-profile> --region <aws-region> <service> <command>
 
-# Stop instance
-python -m platform_cli --profile myprofile --region us-east-1 ec2 stop --id i-xxxxxxxxxxxx
+EC2: Create / List / Start / Stop
+$ python -m platform_cli --profile yoav --region us-east-1 ec2 create --type t2.micro
+Launched instance: i-0abcd1234ef567890
 
-# Start instance
-python -m platform_cli --profile myprofile --region us-east-1 ec2 start --id i-xxxxxxxxxxxx
+$ python -m platform_cli --profile yoav --region us-east-1 ec2 list
+Current EC2 instances:
+[{'id': 'i-0abcd1234ef567890', 'state': 'pending', 'type': 't2.micro'}]
 
-# Terminate instance
-python -m platform_cli --profile myprofile --region us-east-1 ec2 terminate --id i-xxxxxxxxxxxx
-S3
-bash
-Copy
-Edit
-# Create private bucket
-python -m platform_cli --profile myprofile --region us-east-1 s3 create --name my-test-bucket
+$ python -m platform_cli --profile yoav --region us-east-1 ec2 start --id i-0abcd1234ef567890
+Started instance: i-0abcd1234ef567890
 
-# Create public bucket (asks confirmation)
-python -m platform_cli --profile myprofile --region us-east-1 s3 create --name my-public-bucket --public
+$ python -m platform_cli --profile yoav --region us-east-1 ec2 stop --id i-0abcd1234ef567890
+Stopped instance: i-0abcd1234ef567890
 
-# Upload file
-python -m platform_cli --profile myprofile --region us-east-1 s3 upload --bucket my-test-bucket --file ./localfile.txt --key remote.txt
+S3: Create / Upload / List
+$ python -m platform_cli --profile yoav --region us-east-1 s3 create --name demo-bucket-yoav-123
+Created bucket: demo-bucket-yoav-123
 
-# Delete file
-python -m platform_cli --profile myprofile --region us-east-1 s3 delete-file --bucket my-test-bucket --key remote.txt
+$ python -m platform_cli --profile yoav --region us-east-1 s3 upload --bucket demo-bucket-yoav-123 --file ./README.md
+Uploaded ./README.md to s3://demo-bucket-yoav-123/README.md
 
-# List buckets created by CLI
-python -m platform_cli --profile myprofile --region us-east-1 s3 list
+$ python -m platform_cli --profile yoav --region us-east-1 s3 list
+S3 buckets:
+['demo-bucket-yoav-123']
 
-# Delete bucket
-python -m platform_cli --profile myprofile --region us-east-1 s3 delete --bucket my-test-bucket
-Route53
-bash
-Copy
-Edit
-# Create hosted zone
-python -m platform_cli --profile myprofile --region us-east-1 route53 create --domain test1234.com
+Route53: Zone + DNS Record
+$ python -m platform_cli --profile yoav --region us-east-1 route53 create-zone --name example.com
+Created hosted zone: Z123456789ABCDEFG (example.com)
 
-# List hosted zones
-python -m platform_cli --profile myprofile --region us-east-1 route53 list
+$ python -m platform_cli --profile yoav --region us-east-1 route53 create-record \
+    --zone-id Z123456789ABCDEFG \
+    --name test.example.com \
+    --type A \
+    --value 1.2.3.4
+Created record: test.example.com -> 1.2.3.4
 
-# Add DNS record
-python -m platform_cli --profile myprofile --region us-east-1 route53 add-record --zone-id Z12345ABCDE --name www.test1234.com --type A --value 1.2.3.4 --ttl 60
-
-# List records in a zone
-python -m platform_cli --profile myprofile --region us-east-1 route53 list-records --zone-id Z12345ABCDE
-📌 Notes
-S3 buckets must have globally unique names.
-
-Public buckets will ask for confirmation before creation.
-
-EC2 instance limit: 2 per owner.
-
-Default AMIs pulled dynamically via SSM Parameter Store.
