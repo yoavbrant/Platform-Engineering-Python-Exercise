@@ -1,4 +1,4 @@
-# 🛠 Platform CLI – Final Project
+# Platform CLI – Final Project
 
 A command-line tool for securely managing **AWS EC2**, **S3**, and **Route53** resources.
 
