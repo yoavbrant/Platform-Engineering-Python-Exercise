@@ -52,59 +52,77 @@ cd Platform-Engineering-Python-Exercise
 
 pip install -r requirements.txt
 
-Usage
+aws configure --profile <profile-name>
 
-Run the CLI using:
+Platform CLI Demonstration
 
-python -m platform_cli --profile <aws-profile> --region <aws-region> <service> <command>
+This document contains example commands for demonstrating the platform_cli Python CLI. Replace placeholders (like <bucket-name> or <zone-id>) with actual values.
 
-EC2: Create / List / Start / Stop
+1️⃣ Setup AWS Profile
+# Make sure AWS CLI has your profile
+aws configure --profile <profile-name>
 
-$ python -m platform_cli --profile yoav --region us-east-1 ec2 create --type t2.micro
 
-Launched instance: i-0abcd1234ef567890
+Enter your AWS Access Key, Secret Key, region (<region-name>), and output format (json).
 
-$ python -m platform_cli --profile yoav --region us-east-1 ec2 list
+2️⃣ EC2 Commands
+List all EC2 instances
+python -m platform_cli --profile <profile-name> --region <region-name> ec2 list
 
-Current EC2 instances:
+Launch a new EC2 instance
+python -m platform_cli --profile <profile-name> --region <region-name> ec2 launch --type t2.micro --os amazon
 
-[{'id': 'i-0abcd1234ef567890', 'state': 'pending', 'type': 't2.micro'}]
 
-$ python -m platform_cli --profile yoav --region us-east-1 ec2 start --id i-0abcd1234ef567890
+Output example:
 
-Started instance: i-0abcd1234ef567890
+Launched: i-0abc1234def56789
 
-$ python -m platform_cli --profile yoav --region us-east-1 ec2 stop --id i-0abcd1234ef567890
+Stop an EC2 instance
+python -m platform_cli --profile <profile-name> --region <region-name> ec2 stop --id i-0abc1234def56789
 
-Stopped instance: i-0abcd1234ef567890
+Start an EC2 instance
+python -m platform_cli --profile <profile-name> --region <region-name> ec2 start --id i-0abc1234def56789
 
-S3: Create / Upload / List
+Terminate an EC2 instance
+python -m platform_cli --profile <profile-name> --region <region-name> ec2 terminate --id i-0abc1234def56789
 
-$ python -m platform_cli --profile yoav --region us-east-1 s3 create --name demo-bucket-yoav-123
+3️⃣ S3 Commands
+List all buckets
+python -m platform_cli --profile <profile-name> --region <region-name> s3 list
 
-Created bucket: demo-bucket-yoav-123
+Create a new bucket
+python -m platform_cli --profile <profile-name> --region <region-name> s3 create --name <bucket-name>
 
-$ python -m platform_cli --profile yoav --region us-east-1 s3 upload --bucket demo-bucket-yoav-123 --file ./README.md
+Create a public bucket (requires confirmation)
+python -m platform_cli --profile <profile-name> --region <region-name> s3 create --name <bucket-name> --public
 
-Uploaded ./README.md to s3://demo-bucket-yoav-123/README.md
+Upload a file
+python -m platform_cli --profile <profile-name> --region <region-name> s3 upload --name <bucket-name> --file ./local_file.txt --key remote_file.txt
 
-$ python -m platform_cli --profile yoav --region us-east-1 s3 list
+Delete a file
+python -m platform_cli --profile <profile-name> --region <region-name> s3 delete-file --name <bucket-name> --key remote_file.txt
 
-S3 buckets:
+Delete a bucket
+python -m platform_cli --profile <profile-name> --region <region-name> s3 delete-bucket --name <bucket-name>
 
-['demo-bucket-yoav-123']
+4️⃣ Route53 Commands
+List hosted zones
+python -m platform_cli --profile <profile-name> --region <region-name> route53 list
 
-Route53: Zone + DNS Record
+Create a hosted zone
+python -m platform_cli --profile <profile-name> --region <region-name> route53 create --zone example.com
 
-$ python -m platform_cli --profile yoav --region us-east-1 route53 create-zone --name example.com
+Add a DNS record
+python -m platform_cli --profile <profile-name> --region <region-name> route53 add-record --zone-id <zone-id> --record www.example.com --rtype A --value 1.2.3.4
 
-Created hosted zone: Z123456789ABCDEFG (example.com)
+List records in a hosted zone
+python -m platform_cli --profile <profile-name> --region <region-name> route53 records --zone-id <zone-id>
 
-$ python -m platform_cli --profile yoav --region us-east-1 route53 create-record \
-    --zone-id Z123456789ABCDEFG \
-    --name test.example.com \
-    --type A \
-    --value 1.2.3.4
-    
-Created record: test.example.com -> 1.2.3.4
 
+✅ Notes for Demonstration
+
+Always replace <bucket-name>, <zone-id>, <instance-id>, <profile-name>, and <region-name> with actual values returned by previous commands.
+
+This sequence demonstrates EC2 instance management, S3 bucket/file management, and Route53 DNS management.
+
+The CLI enforces safe defaults (like requiring confirmation for public buckets).
