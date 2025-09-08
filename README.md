@@ -1,115 +1,143 @@
-# Platform CLI – Final Project
+# 🛠 Platform CLI – Final Project
 
-A command-line tool for managing AWS EC2, S3, and Route53 resources securely.
-
----
-
-## Features
-
-- **EC2**
-  - List, launch, stop, start, and terminate instances.
-  - Instance types restricted to `t3.micro` or `t2.small`.
-  - Maximum 2 instances allowed per owner.
-  - Automatically fetches the **latest AMI** (Amazon Linux 2023 or Ubuntu 22.04) from SSM Parameter Store.
-  - All instances tagged with `CreatedBy=<owner>` for filtering and safety.
-
-- **S3**
-  - Create buckets (default: **private + encrypted**).
-  - Optionally create **public buckets**, with confirmation prompt.
-  - Upload and delete files.
-  - List only buckets created by this CLI.
-  - Buckets always tagged with `CreatedBy=<owner>`.
-
-- **Route53**
-  - Create hosted zones.
-  - List hosted zones.
-  - Add DNS records.
-  - List records per zone.
-
-- **Security & Safety**
-  - Uses AWS profiles (`--profile`) – no hardcoded secrets.
-  - Consistent resource tagging.
-  - Clear CLI output with success/failure.
-  - Default S3 settings: **private, encrypted**.
+A command-line tool for securely managing **AWS EC2**, **S3**, and **Route53** resources.
 
 ---
 
-## Prerequisites
+## ✨ Features
+
+### EC2
+- **List, launch, stop, start, and terminate instances.**
+- Instance types restricted to `t3.micro` or `t2.small`.
+- Maximum **2 instances per owner**.
+- Automatically fetches the **latest AMI** (Amazon Linux 2023 or Ubuntu 22.04) from SSM Parameter Store.
+- Instances are tagged with `CreatedBy=<owner>` for filtering and safety.
+
+### S3
+- Create buckets (**private + encrypted by default**).
+- Optionally create **public buckets** (requires confirmation).
+- Upload and delete files.
+- List only buckets created by this CLI.
+- Buckets are always tagged with `CreatedBy=<owner>`.
+
+### Route53
+- Create hosted zones.
+- List hosted zones.
+- Add DNS records.
+- List records per zone.
+
+### Security & Safety
+- Uses AWS profiles (`--profile`) — no hardcoded secrets.
+- Consistent tagging for all resources.
+- Clear CLI output with success/failure messages.
+- Safe defaults (private, encrypted S3 buckets).
+
+---
+
+## ⚙ Prerequisites
 
 - Python 3.9+
-- AWS CLI installed & configured with profiles:
-  aws configure --profile myprofile
-  
-IAM user/role with permissions for EC2, S3, and Route53.
+- AWS CLI installed
+- IAM user/role with permissions for **EC2, S3, and Route53**
+- Configure your AWS profile:
 
-Installation
-
-Clone the repository and install dependencies:
-
+```bash
+aws configure --profile <profile-name>
+📦 Installation
+bash
+Copy code
+# Clone the repository
 git clone https://github.com/yoavbrant/Platform-Engineering-Python-Exercise.git
 
+# Navigate into the project directory
 cd Platform-Engineering-Python-Exercise
 
+# Install dependencies
 pip install -r requirements.txt
-
-aws configure --profile <profile-name>
-
-Platform CLI Demonstration
+🚀 Platform CLI Demonstration
+Replace placeholders (<bucket-name>, <zone-id>, <instance-id>, <profile-name>, <region-name>) with real values.
 
 EC2 Commands
-
 List all EC2 instances
+
+bash
+Copy code
 python -m platform_cli --profile <profile-name> --region <region-name> ec2 list
-
 Launch a new EC2 instance
+
+bash
+Copy code
 python -m platform_cli --profile <profile-name> --region <region-name> ec2 launch --type t2.micro --os amazon
-
 Stop an EC2 instance
-python -m platform_cli --profile <profile-name> --region <region-name> ec2 stop --id i-0abc1234def56789
 
+bash
+Copy code
+python -m platform_cli --profile <profile-name> --region <region-name> ec2 stop --id <instance-id>
 Start an EC2 instance
-python -m platform_cli --profile <profile-name> --region <region-name> ec2 start --id i-0abc1234def56789
 
+bash
+Copy code
+python -m platform_cli --profile <profile-name> --region <region-name> ec2 start --id <instance-id>
 Terminate an EC2 instance
-python -m platform_cli --profile <profile-name> --region <region-name> ec2 terminate --id i-0abc1234def56789
 
+bash
+Copy code
+python -m platform_cli --profile <profile-name> --region <region-name> ec2 terminate --id <instance-id>
 S3 Commands
-
 List all buckets
+
+bash
+Copy code
 python -m platform_cli --profile <profile-name> --region <region-name> s3 list
-
 Create a new bucket
+
+bash
+Copy code
 python -m platform_cli --profile <profile-name> --region <region-name> s3 create --name <bucket-name>
-
 Create a public bucket (requires confirmation)
+
+bash
+Copy code
 python -m platform_cli --profile <profile-name> --region <region-name> s3 create --name <bucket-name> --public
-
 Upload a file
+
+bash
+Copy code
 python -m platform_cli --profile <profile-name> --region <region-name> s3 upload --name <bucket-name> --file ./local_file.txt --key remote_file.txt
-
 Delete a file
+
+bash
+Copy code
 python -m platform_cli --profile <profile-name> --region <region-name> s3 delete-file --name <bucket-name> --key remote_file.txt
-
 Delete a bucket
+
+bash
+Copy code
 python -m platform_cli --profile <profile-name> --region <region-name> s3 delete-bucket --name <bucket-name>
-
 Route53 Commands
-
 List hosted zones
+
+bash
+Copy code
 python -m platform_cli --profile <profile-name> --region <region-name> route53 list
-
 Create a hosted zone
+
+bash
+Copy code
 python -m platform_cli --profile <profile-name> --region <region-name> route53 create --zone example.com
-
 Add a DNS record
+
+bash
+Copy code
 python -m platform_cli --profile <profile-name> --region <region-name> route53 add-record --zone-id <zone-id> --record www.example.com --rtype A --value 1.2.3.4
-
 List records in a hosted zone
+
+bash
+Copy code
 python -m platform_cli --profile <profile-name> --region <region-name> route53 records --zone-id <zone-id>
+📝 Notes for Demonstration
+Always replace placeholders with values returned by previous commands.
 
+Safe defaults: public S3 buckets require confirmation.
 
-Notes for Demonstration
-
-Always replace <bucket-name>, <zone-id>, <instance-id>, <profile-name>, and <region-name> with actual values returned by previous commands.
-
-The CLI enforces safe defaults (like requiring confirmation for public buckets).
+All resources are tagged for ownership and easy filtering.
