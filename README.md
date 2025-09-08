@@ -39,13 +39,7 @@ A command-line tool for securely managing **AWS EC2**, **S3**, and **Route53** r
 - Python 3.9+
 - AWS CLI installed
 - IAM user/role with permissions for **EC2, S3, and Route53**
-- Configure your AWS profile:
 
-```bash
-aws configure --profile <profile-name>
-📦 Installation
-bash
-Copy code
 # Clone the repository
 git clone https://github.com/yoavbrant/Platform-Engineering-Python-Exercise.git
 
@@ -54,88 +48,82 @@ cd Platform-Engineering-Python-Exercise
 
 # Install dependencies
 pip install -r requirements.txt
-🚀 Platform CLI Demonstration
+
+# Configure your AWS profile:
+aws configure --profile <profile-name>
+
+Platform CLI Demonstration
 Replace placeholders (<bucket-name>, <zone-id>, <instance-id>, <profile-name>, <region-name>) with real values.
 
 EC2 Commands
+
 List all EC2 instances
 
-bash
-Copy code
 python -m platform_cli --profile <profile-name> --region <region-name> ec2 list
+
 Launch a new EC2 instance
 
-bash
-Copy code
 python -m platform_cli --profile <profile-name> --region <region-name> ec2 launch --type t2.micro --os amazon
+
 Stop an EC2 instance
 
-bash
-Copy code
 python -m platform_cli --profile <profile-name> --region <region-name> ec2 stop --id <instance-id>
+
 Start an EC2 instance
 
-bash
-Copy code
 python -m platform_cli --profile <profile-name> --region <region-name> ec2 start --id <instance-id>
+
 Terminate an EC2 instance
 
-bash
-Copy code
 python -m platform_cli --profile <profile-name> --region <region-name> ec2 terminate --id <instance-id>
+
 S3 Commands
+
 List all buckets
 
-bash
-Copy code
 python -m platform_cli --profile <profile-name> --region <region-name> s3 list
+
 Create a new bucket
 
-bash
-Copy code
 python -m platform_cli --profile <profile-name> --region <region-name> s3 create --name <bucket-name>
+
 Create a public bucket (requires confirmation)
 
-bash
-Copy code
 python -m platform_cli --profile <profile-name> --region <region-name> s3 create --name <bucket-name> --public
+
 Upload a file
 
-bash
-Copy code
 python -m platform_cli --profile <profile-name> --region <region-name> s3 upload --name <bucket-name> --file ./local_file.txt --key remote_file.txt
+
 Delete a file
 
-bash
-Copy code
 python -m platform_cli --profile <profile-name> --region <region-name> s3 delete-file --name <bucket-name> --key remote_file.txt
+
 Delete a bucket
 
-bash
-Copy code
 python -m platform_cli --profile <profile-name> --region <region-name> s3 delete-bucket --name <bucket-name>
+
 Route53 Commands
+
 List hosted zones
 
-bash
-Copy code
 python -m platform_cli --profile <profile-name> --region <region-name> route53 list
+
 Create a hosted zone
 
-bash
-Copy code
+
 python -m platform_cli --profile <profile-name> --region <region-name> route53 create --zone example.com
+
 Add a DNS record
 
-bash
-Copy code
 python -m platform_cli --profile <profile-name> --region <region-name> route53 add-record --zone-id <zone-id> --record www.example.com --rtype A --value 1.2.3.4
+
 List records in a hosted zone
 
-bash
-Copy code
 python -m platform_cli --profile <profile-name> --region <region-name> route53 records --zone-id <zone-id>
 📝 Notes for Demonstration
+
+
 Always replace placeholders with values returned by previous commands.
 
 Safe defaults: public S3 buckets require confirmation.
