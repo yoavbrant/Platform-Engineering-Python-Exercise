@@ -56,26 +56,13 @@ aws configure --profile <profile-name>
 
 Platform CLI Demonstration
 
-This document contains example commands for demonstrating the platform_cli Python CLI. Replace placeholders (like <bucket-name> or <zone-id>) with actual values.
+EC2 Commands
 
-1️⃣ Setup AWS Profile
-# Make sure AWS CLI has your profile
-aws configure --profile <profile-name>
-
-
-Enter your AWS Access Key, Secret Key, region (<region-name>), and output format (json).
-
-2️⃣ EC2 Commands
 List all EC2 instances
 python -m platform_cli --profile <profile-name> --region <region-name> ec2 list
 
 Launch a new EC2 instance
 python -m platform_cli --profile <profile-name> --region <region-name> ec2 launch --type t2.micro --os amazon
-
-
-Output example:
-
-Launched: i-0abc1234def56789
 
 Stop an EC2 instance
 python -m platform_cli --profile <profile-name> --region <region-name> ec2 stop --id i-0abc1234def56789
@@ -86,7 +73,8 @@ python -m platform_cli --profile <profile-name> --region <region-name> ec2 start
 Terminate an EC2 instance
 python -m platform_cli --profile <profile-name> --region <region-name> ec2 terminate --id i-0abc1234def56789
 
-3️⃣ S3 Commands
+S3 Commands
+
 List all buckets
 python -m platform_cli --profile <profile-name> --region <region-name> s3 list
 
@@ -105,7 +93,8 @@ python -m platform_cli --profile <profile-name> --region <region-name> s3 delete
 Delete a bucket
 python -m platform_cli --profile <profile-name> --region <region-name> s3 delete-bucket --name <bucket-name>
 
-4️⃣ Route53 Commands
+Route53 Commands
+
 List hosted zones
 python -m platform_cli --profile <profile-name> --region <region-name> route53 list
 
@@ -119,10 +108,8 @@ List records in a hosted zone
 python -m platform_cli --profile <profile-name> --region <region-name> route53 records --zone-id <zone-id>
 
 
-✅ Notes for Demonstration
+Notes for Demonstration
 
 Always replace <bucket-name>, <zone-id>, <instance-id>, <profile-name>, and <region-name> with actual values returned by previous commands.
-
-This sequence demonstrates EC2 instance management, S3 bucket/file management, and Route53 DNS management.
 
 The CLI enforces safe defaults (like requiring confirmation for public buckets).
