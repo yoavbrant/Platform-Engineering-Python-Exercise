@@ -123,8 +123,8 @@ python -m platform_cli --profile <profile-name> --region <region-name> route53 r
 
 ### Notes for Demonstration
 
-#### Always replace placeholders with values returned by previous commands.
+- Always replace placeholders with values returned by previous commands.
 
-#### Safe defaults: public S3 buckets require confirmation.
+- Safe defaults: public S3 buckets require confirmation.
 
-#### All resources are tagged for ownership and easy filtering.
+- All resources are tagged for ownership and easy filtering.
